@@ -1,0 +1,71 @@
+{% block extends %}
+{{ "{% extends 'CoreBaseBundle:Layout1:index.html.twig' %}" }}
+{% endblock extends %}
+{# |length > 100|slice(100, length)  #}
+{% block body %}
+{{ "{% block content -%}" }}
+    <table class="records_list table table-hover table-condensed">
+        <thead>
+            <tr>
+            {%- for field, metadata in fields %}
+
+                <th style='text-align: center'>{{ field|capitalize }}</th>
+
+            {%- endfor %}
+
+                <th style="text-align: center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{ '{% for entity in entities %}' }}
+            <tr>
+
+        {%- for field, metadata in fields %}
+            {%- if loop.first and ('show' in actions) %}
+
+                <td style='text-align: center'><a href="{{ "{{ path('" ~ route_name_prefix ~ "_show', { 'id': entity.id }) }}" }}">{{ '{{ entity.' ~ field|replace({'_': ''}) ~ ' }}' }}</a></td>
+                
+            {% elseif  field == 'avatar' %}
+                
+                <td style='text-align: center'>{{ '{% if entity.avatar == NULL %} <img src=\'{{ asset ("bundles/corebase/images/no_image.jpg") }}\'/> 
+                    {% else %} <img src=\'{{ asset (entity.avatar) }}\'/>{% endif %}' }} 
+                </td>
+            {%- elseif metadata.type in ['date', 'datetime'] %}
+
+                <td style='text-align: center'>{{ '{% if entity.' ~ field|replace({'_': ''}) ~ ' %}{{ entity.' ~ field|replace({'_': ''}) ~ '|date(\'Y-m-d H:i:s\') }}{% endif %}' }}</td>
+
+            {% elseif metadata.type in ['boolean'] %}
+                
+                <td style='text-align: center'>{{ '{% if entity.' ~ field ~ ' == "1" %} <i class="icon-check"></i> {% else %} <i class="icon-check-empty"></i> {% endif %}'  }}</td>
+            {%- else %}
+
+                <td style='text-align: center'>{{ '{{ entity.' ~ field|replace({'_': ''}) ~ ' }}' }}</td>
+
+            {%- endif %}
+
+            {%- if loop.last %}
+
+                <td style='text-align: center'>
+                    {%- include "crud/views/others/actions.html.twig.twig" %}
+                </td>
+
+            {%- endif %}
+        {%- endfor %}
+
+            </tr>
+        {{ '{% endfor %}' }}
+        </tbody>
+    </table>
+
+    {% if 'new' in actions %}
+    <div class="form-group">
+        <div class="col-sm-2">
+            <a href="{{ "{{ path('" ~ route_name_prefix ~ "_new') }}" }}" class="btn btn-primary">
+                Create a new entry
+            </a>
+        </div>
+    </div>
+            
+    {% endif %}
+{{ "{% endblock %}" }}
+{% endblock body %}

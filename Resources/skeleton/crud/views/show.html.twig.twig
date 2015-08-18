@@ -1,0 +1,39 @@
+{% block extends %}
+{{ "{% extends 'CoreBaseBundle:Layout1:index.html.twig' %}" }}
+{% endblock extends %}
+
+{% block body %}
+{{ "{% block content -%}" }}
+
+    <table class="record_properties table table-hover">
+        <tbody>
+        {%- for field, metadata in fields %}
+
+            <tr>
+                <th>{{ field|capitalize }}</th>
+
+            {%- if metadata.type in ['date', 'datetime'] %}
+
+                <td>{{ '{{ entity.' ~ field|replace({'_': ''}) ~ '|date(\'Y-m-d H:i:s\') }}' }}</td>
+            {% elseif metadata.type in ['boolean'] %}
+                
+                <td>{{ '{% if entity.' ~ field ~ ' == "1" %} <i class="icon-check"></i> {% else %} <i class="icon-check-empty"></i> {% endif %}'  }}</td>
+                
+            {%- else %}
+
+                
+                <td>{{ '{{ entity.' ~ field|replace({'_': ''}) ~ ' }}' }}</td>
+
+            {%- endif %}
+
+            </tr>
+
+        {%- endfor %}
+
+        </tbody>
+    </table>
+
+    {% set hide_edit, hide_delete = false, false %}
+    {% include 'crud/views/others/record_actions.html.twig.twig' %}
+{{ "{% endblock %}" }}
+{% endblock body %}

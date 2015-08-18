@@ -1,0 +1,42 @@
+{% block extends %}
+{{ "{% extends 'CoreBaseBundle:Layout1:index.html.twig' %}" }}
+
+{{ "{% form_theme edit_form 'CoreBaseBundle:Default:form_div_layout.html.twig' %}"  }}
+{% endblock extends %}
+
+{% block body %}
+{{ "{% block content -%}" }}
+
+
+{{ '{% if form_errors(edit_form) %}' }}
+{{ '{{ form_errors(edit_form) }}' }}
+{{ '{% endif %}' }}
+
+
+         {{ '{{ form(edit_form ) }}' }} 
+         <div class="form-group">
+    
+        {% set hide_edit, hide_delete = true, false %}
+        {% include 'crud/views/others/record_actions.html.twig.twig' %}
+        </div>
+       {# <form method='POST' action="{{ "{{ path('" ~ route_name_prefix ~ "_update', { 'id': entity.id }) }}" }}">
+        {%- for field,metadata in fields %}
+            <div class='form-group'>
+                <label class='col-sm-2 control-label'>
+                    {{ '{{ form_label(edit_form.' ~ field ~ ')}}' }}
+                </label>
+                <div class='col-sm-9'>
+                    {{ '{{ form_widget(edit_form.' ~ field ~ ')}}' }}
+                </div>
+            </div>
+        {%- endfor %}
+        <div class="form-group">
+    
+        {% set hide_edit, hide_delete = true, false %}
+        {% include 'crud/views/others/record_actions.html.twig.twig' %}
+        </div>
+
+       </form> #}
+
+{{ "{% endblock %}" }}
+{% endblock body %}

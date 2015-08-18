@@ -1,0 +1,17 @@
+
+<table border="0">
+    <tr>
+        <td>
+            <a href="{{ "{{ path('" ~ route_name_prefix ~ "')}}"}}" class="btn btn-primary">
+                Back to the list
+            </a>
+        </td>
+        {% if ('edit' in actions) and (not hide_edit) %}
+        <td>
+            <a href="{{ "{{ path('" ~ route_name_prefix ~ "_edit', { 'id':app." ~ route_name_prefix ~".id})}}"}}" class="btn btn-success">
+                Edit
+            </a>
+        </td>
+        {% endif %}
+    <tr>
+</table>

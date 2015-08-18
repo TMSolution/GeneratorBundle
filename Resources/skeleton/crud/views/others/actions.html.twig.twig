@@ -1,0 +1,18 @@
+
+                
+
+                {%- for action in record_actions %}
+
+                    
+                        {% if action == "show" %}
+<a href="{{ "{{ path('" ~ route_name_prefix ~ "_" ~ action ~ "',{ 'id': entity.id}) }}" }}" class="btn btn-xs btn-teal tooltips"><i class="icon-eye-open"></i></a>
+                        {% elseif action == "edit" %}
+<a href="{{ "{{ path('" ~route_name_prefix ~ "_" ~ action ~ "', { 'id': entity.id}) }} " }} " class="btn btn-xs btn-green tooltips"><i class="icon-edit"></i></a>
+                        {% else %}
+                        {% endif %}
+
+
+                {%- endfor %}
+                        <a href='#' class="btn btn-xs btn-danger"><i class="icon-check-minus"></i></a>
+
+                

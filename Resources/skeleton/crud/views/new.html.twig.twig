@@ -1,0 +1,40 @@
+{% block extends %}
+{{ "{% extends 'CoreBaseBundle:Layout1:index.html.twig' %}" }}
+{{ "{% form_theme form 'CoreBaseBundle:Default:form_div_layout.html.twig' %}" }}
+{% endblock extends %}
+
+{% block body %}
+{{ "{% block content -%}" }}
+    {{ '{% if form_errors(form) %}' }}
+    {{ '{{ form_errors(form) }}' }}
+    {{ '{% endif %}' }}
+     
+    {{ '{{ form(form) }}' }}
+
+    {% set hide_edit, hide_delete = true, true %}
+    {% include 'crud/views/others/record_actions.html.twig.twig' %}
+   
+
+
+       {# {{ '{{ form(edit_form) }}' }}   #}
+       {# <form method='POST' action="{{ "{{ path('" ~ route_name_prefix ~ "_create') }}" }}">
+        {%- for field,metadata in fields %}
+            <div class='form-group'>
+                <label class='col-sm-2 control-label'>
+                    {{ '{{ form_label(form.' ~ field ~ ')}}' }}
+                </label>
+                <div class='col-sm-9'>
+                    {{ '{{ form_widget(form.' ~ field ~ ')}}' }}
+                </div>
+            </div>
+        {%- endfor %}
+        <div class="form-group">
+    
+        {% set hide_edit, hide_delete = true, false %}
+        {% include 'crud/views/others/record_actions.html.twig.twig' %}
+        </div>
+
+       </form>#}
+
+{{ "{% endblock %}" }}
+{% endblock body %}

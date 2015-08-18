@@ -1,0 +1,8 @@
+
+parameters:
+#    tm_solution_generator.example.class: TMSolution\GeneratorBundle\Example
+
+services:
+#    tm_solution_generator.example:
+#        class: %tm_solution_generator.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

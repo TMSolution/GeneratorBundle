@@ -1,0 +1,7 @@
+tm_solution_generator_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller: TMSolutionGeneratorBundle:Default:index }
+
+tm_solution_generator_memorytest:
+    pattern:  /memorytest/
+    defaults: { _controller: TMSolutionGeneratorBundle:Memorytest:index }

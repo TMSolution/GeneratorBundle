@@ -128,31 +128,26 @@ class Generator extends \Faker\Generator {
     protected $limitRelatedEntities = array();
     protected $packageSize = 5000;
 
-    public function addProvider($provider)
-    {
+    public function addProvider($provider) {
         array_unshift($this->providers, $provider);
     }
 
-    public function getProviders()
-    {
+    public function getProviders() {
         return $this->providers;
     }
 
-    public function seed($seed = null)
-    {
+    public function seed($seed = null) {
         mt_srand($seed);
     }
 
-    public function format($formatter, $arguments = array())
-    {
+    public function format($formatter, $arguments = array()) {
         return call_user_func_array($this->getFormatter($formatter), $arguments);
     }
 
     /**
      * @return Callable
      */
-    public function getFormatter($formatter)
-    {
+    public function getFormatter($formatter) {
         if (isset($this->formatters[$formatter])) {
             return $this->formatters[$formatter];
         }
@@ -171,40 +166,37 @@ class Generator extends \Faker\Generator {
      * @param  string $string String that needs to bet parsed
      * @return string
      */
-    public function parse($string)
-    {
+    public function parse($string) {
         return preg_replace_callback('/\{\{\s?(\w+)\s?\}\}/u', array($this, 'callFormatWithMatches'), $string);
     }
 
-    protected function callFormatWithMatches($matches)
-    {
+    protected function callFormatWithMatches($matches) {
         return $this->format($matches[1]);
     }
 
-    public function __get($attribute)
-    {
+    public function __get($attribute) {
         return $this->format($attribute);
     }
 
-    public function __call($method, $attributes)
-    {
+    public function __call($method, $attributes) {
         return $this->format($method, $attributes);
     }
 
-    public function randomAssociation($fieldName, $targetEntity, $associationType, EntityManagerInterface $manager)
-    {
+    public function randomAssociation($fieldName, $targetEntity, $associationType, EntityManagerInterface $manager) {
+      
 
         $repo = $manager->getRepository($targetEntity);
         $randomId = $this->getRandomId($targetEntity, $associationType, $manager);
-
+ if ($randomId) {
         if ($associationType == ClassMetadata::MANY_TO_MANY) {
             return array($repo->findOneById($randomId));
         }
-        return $repo->findOneById($randomId);
+       
+            return $repo->findOneById($randomId);
+        }
     }
 
-    public function findAssociatedIdentifiers($associationEntities, $manager)
-    {
+    public function findAssociatedIdentifiers($associationEntities, $manager) {
 
 
 
@@ -216,8 +208,7 @@ class Generator extends \Faker\Generator {
         }
     }
 
-    protected function findAssociatedIdentifier($associationEntity, $manager, $associationType, $resetLimit = true)
-    {
+    protected function findAssociatedIdentifier($associationEntity, $manager, $associationType, $resetLimit = true) {
 
         $repo = $manager->getRepository($associationEntity);
 
@@ -256,27 +247,34 @@ class Generator extends \Faker\Generator {
           } */
     }
 
-    protected function getAssociationType($targetEntity)
-    {
+    protected function getAssociationType($targetEntity) {
         
     }
 
-    protected function getRandomId($targetEntity, $associationType, $manager)
-    {
+    protected function getRandomId($targetEntity, $associationType, $manager) {
 
-        var_dump($targetEntity);
-        
-        
+
         if (empty($this->relatedEntities[$targetEntity])) {
 
-
+            
             $this->findAssociatedIdentifier($targetEntity, $manager, $associationType, false);
+        
+            
         }
 
+        
+       // dump($this->relatedEntities[$targetEntity]);
         try {
-            $key = array_rand($this->relatedEntities[$targetEntity], 1);
-            $value = $this->relatedEntities[$targetEntity][$key];
-            unset($this->relatedEntities[$targetEntity][$key]);
+        
+                
+            if (count($this->relatedEntities[$targetEntity]) > 0) {
+          
+                $key = array_rand($this->relatedEntities[$targetEntity], 1);
+                $value = $this->relatedEntities[$targetEntity][$key];
+                unset($this->relatedEntities[$targetEntity][$key]);
+            } else {
+                $value = null;
+            }
         } catch (Exception $e) {
 
             echo " Brak możliwości pobrania danych z encji " . $targetEntity . "\n";

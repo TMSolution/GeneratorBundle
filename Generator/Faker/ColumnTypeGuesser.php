@@ -75,10 +75,10 @@ class ColumnTypeGuesser extends \Faker\ORM\Doctrine\ColumnTypeGuesser {
     public function getAssociation($fieldName, $targetEntity, $assocType, $manager) {
         $generator = $this->generator;
 
-        return function() use ($generator, $fieldName, $targetEntity, $assocType, $manager) {
+       return function() use ($generator, $fieldName, $targetEntity, $assocType, $manager) {
 
             return $generator->randomAssociation($fieldName, $targetEntity, $assocType, $manager);
-        };
+       };
     }
 
 }

@@ -17,8 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
-//use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Sensio\Bundle\GeneratorBundle\Command\Helper\QuestionHelper;
+///use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
 use TMSolution\GeneratorBundle\Generator\DoctrineFormGenerator;
 use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 use Sensio\Bundle\GeneratorBundle\Command\Validators;
@@ -81,7 +81,7 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
+        $dialog = $this->getHelper();
 
         if ($input->isInteractive()) {
             if (!$dialog->askConfirmation($output, $dialog->getQuestion('Do you confirm generation', 'yes', '?'), true)) {
@@ -127,8 +127,8 @@ EOT
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
-        $dialog->writeSection($output, 'Welcome to the Doctrine2 CRUD generator');
+        $helper = $this->getQuestionHelper();
+        $helper->writeSection($output, 'Welcome to the Doctrine2 CRUD generator');
 
         // namespace
         $output->writeln(array(
@@ -143,7 +143,8 @@ EOT
             '',
         ));
 
-        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
+        //$entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
+        $entity = $helper->askAndValidate($output, $helper->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
         $input->setOption('entity', $entity);
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
@@ -155,7 +156,7 @@ EOT
             'You can also ask it to generate "write" actions: new, update, and delete.',
             '',
         ));
-        $withWrite = $dialog->askConfirmation($output, $dialog->getQuestion('Do you want to generate the "write" actions', $withWrite ? 'yes' : 'no', '?'), $withWrite);
+        $withWrite = $helper->askConfirmation($output, $helper->getQuestion('Do you want to generate the "write" actions', $withWrite ? 'yes' : 'no', '?'), $withWrite);
         $input->setOption('with-write', $withWrite);
        
         // format
@@ -165,7 +166,8 @@ EOT
             'Determine the format to use for the generated CRUD.',
             '',
         ));
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $format);
+        //nie ma pozniszej metody - podobna to validateAttempts, lecz nie dziala
+        $format = $helper->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $format);
         $input->setOption('format', $format);
 
         // route prefix
@@ -176,7 +178,7 @@ EOT
             'prefix: /prefix/, /prefix/new, ...).',
             '',
         ));
-        $prefix = $dialog->ask($output, $dialog->getQuestion('Routes prefix', '/'.$prefix), '/'.$prefix);
+        $prefix = $helper->ask($output, $dialog->getQuestion('Routes prefix', '/'.$prefix), '/'.$prefix);
         $input->setOption('route-prefix', $prefix);
 
         // summary
@@ -205,7 +207,7 @@ EOT
         }
     }
 
-    protected function updateRouting(DialogHelper $dialog, InputInterface $input, OutputInterface $output, BundleInterface $bundle, $format, $entity, $prefix)
+    protected function updateRouting(QuestionHelperHelper $dialog, InputInterface $input, OutputInterface $output, BundleInterface $bundle, $format, $entity, $prefix)
     {
         
         $auto = true;

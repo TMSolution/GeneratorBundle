@@ -65,6 +65,7 @@ class FixtureGenerator extends Generator {
     public function generate($bundles, $entityName, $type, $overrideFiles, $entitiesMetadata) {
 
         if ('bundle' == $type) {
+           
             $this->generateBundleFixture($overrideFiles, $entitiesMetadata);
         } else if ('entity' == $type || 'project' == $type) {
             
@@ -78,7 +79,7 @@ class FixtureGenerator extends Generator {
         foreach ($entitiesMetadataArr as $entitiesMetadata) {
 // $bundles[0] . '/DataFixtures/ORM'
 //
-
+//dump($entitiesMetadata);
             $entity = explode('\\', $entitiesMetadata->name);
             $className = end($entity);
             $target = $entitiesMetadata->bundlePath . '/DataFixtures/ORM/' . $className;

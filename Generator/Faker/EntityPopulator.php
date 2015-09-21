@@ -139,7 +139,9 @@ class EntityPopulator extends \Faker\ORM\Doctrine\EntityPopulator {
 
                     //echo "pola asocjacyjne: " . $associationMapping['fieldName'] . "\n";
                     $formatter = $columnTypeGuesser->getAssociation($associationMapping['fieldName'], $associationMapping['targetEntity'], $associationType, $this->manager);
-                    $formatters[$associationMapping['fieldName']] = $formatter;
+                  
+                    if($formatter){
+                    $formatters[$associationMapping['fieldName']] = $formatter;}
                 }
         }
         $index = 0;
@@ -215,7 +217,9 @@ class EntityPopulator extends \Faker\ORM\Doctrine\EntityPopulator {
         }
         
         //echo "Wykonuję persist";
+        
         $manager->persist($obj);
+        $manager->flush($obj);
 
         return $obj;
     }
@@ -223,16 +227,14 @@ class EntityPopulator extends \Faker\ORM\Doctrine\EntityPopulator {
     private function fillColumns($obj, $insertedEntities) {
         foreach ($this->columnFormatters as $field => $format) {
 
-
-
             if (null !== $format) {
 
                 $value = is_callable($format) ? $format($insertedEntities, $obj) : $format;
 
-        
-
+       
+               
                 $this->class->reflFields[$field]->setValue($obj, $value);
-                 
+                
                
                
             }
@@ -240,6 +242,8 @@ class EntityPopulator extends \Faker\ORM\Doctrine\EntityPopulator {
     }
 
     private function callMethods($obj, $insertedEntities) {
+        
+         
         foreach ($this->getModifiers() as $modifier) {
             $modifier($obj, $insertedEntities);
         }

@@ -79,13 +79,13 @@ class Generator {
         foreach ($entitiesMetadata as $el) {
 
             foreach ($el->associationMappings as $mapEntity) {
-
+                if($mapEntity->relationName!=="OneToMany" && $mapEntity->relationName!=="ManyToMany"){
                 if (isset($entitiesMetadata[$mapEntity->targetEntity]) && $entitiesMetadata[$mapEntity->targetEntity]->priority >= $el->priority) {
                     $el->priority = $entitiesMetadata[$mapEntity->targetEntity]->priority + 1;
                 } elseif (!isset($entitiesMetadata[$mapEntity->targetEntity])) {
                     echo "Remember! Generated entity (" . $el->name . ") is related to entity from other bundle (" . $mapEntity->targetEntity . ").\r\nRelated entity fixture won't be generated.\r\n";
                 }
-            }
+            }}
         }
 
         return $entitiesMetadata;

@@ -20,7 +20,7 @@
         "symfony/framework-bundle": "2.*",
         "tmsolution/model-bundle":"1.*",
         "doctrine/doctrine-fixtures-bundle":"2.*",
-        "fzaninotto/faker":"dev-master*"
+        "fzaninotto/faker":"1.*"
     },
     "autoload": {
         "psr-4": {

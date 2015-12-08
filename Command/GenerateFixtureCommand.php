@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
  *
  * @author Mariusz Piela <mariusz.piela@tmsolution.pl>
  */
+ini_set('max_execution_time', 300);
 class GenerateFixtureCommand extends GeneratorCommand {
 
     protected $questionHelper = null;
@@ -140,7 +141,7 @@ EOT
                     
                     if ($this->input->isInteractive()) {
                         
-                        $defaultQuantity = 100;
+                        $defaultQuantity = 100000;
                         $question2 = new Question($questionHelper->getQuestion('How many object of type ' . $entityMetadata->name . ' you want to create <comment>(default ' . $defaultQuantity . ')</comment>?', $defaultQuantity), true);
                         $quantity = $this->questionHelper->ask($this->input, $this->output, $question2);
                         //die('ok');

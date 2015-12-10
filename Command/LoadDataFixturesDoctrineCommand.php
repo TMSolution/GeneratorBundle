@@ -32,6 +32,7 @@ use TMSolution\GeneratorBundle\Command\Helper\QuestionHelper;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Jonathan H. Wage <jonwage@gmail.com>
  */
+ini_set('max_execution_time', 5000);
 class LoadDataFixturesDoctrineCommand extends DoctrineCommand {
 
     protected function configure() {

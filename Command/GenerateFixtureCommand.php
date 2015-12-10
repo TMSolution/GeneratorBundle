@@ -141,7 +141,7 @@ EOT
                     
                     if ($this->input->isInteractive()) {
                         
-                        $defaultQuantity = 100000;
+                        $defaultQuantity = 100;
                         $question2 = new Question($questionHelper->getQuestion('How many object of type ' . $entityMetadata->name . ' you want to create <comment>(default ' . $defaultQuantity . ')</comment>?', $defaultQuantity), true);
                         $quantity = $this->questionHelper->ask($this->input, $this->output, $question2);
                         //die('ok');

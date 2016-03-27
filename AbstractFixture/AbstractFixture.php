@@ -10,22 +10,27 @@ use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use TMSolution\GeneratorBundle\Generator\Faker\Populator;
 use CCO\CallCenterBundle\Entity\UserSkillGradationDictionary;
 
-abstract class AbstractFixture /* extends AbstractFixtureData */ implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface {
+abstract class AbstractFixture /* extends AbstractFixtureData */ implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+{
 
     /**
      * @var ContainerInterface
      */
     protected $container;
     protected $entityName = null;
+    protected $association = [
+    ];
 
     /**
      * {@inheritDoc}
      */
-    public function setContainer(ContainerInterface $container = null) {
+    public function setContainer(ContainerInterface $container = null)
+    {
         $this->container = $container;
     }
-    
-    protected function createEntities($dataFixture, $model) {
+
+    protected function createEntities($dataFixture, $model)
+    {
         $entities = new \Doctrine\Common\Collections\ArrayCollection;
         foreach ($dataFixture as $array) {
             $entity = $model->getEntity();
@@ -35,15 +40,23 @@ abstract class AbstractFixture /* extends AbstractFixtureData */ implements Fixt
         return $entities;
     }
 
-    protected function setValues($entity, $array) {
+    protected function setValues($entity, $array)
+    {
+
         foreach ($array as $key => $value) {
+
+
+            if (isset($this->association[$key]) && !empty($value)) {
+                $model = $this->container->get('model_factory')->getModel($this->association[$key]);
+                $value = $model->getManager()->getReference($this->association[$key], $value);
+            }
             $setter = "set" . $key;
             $entity->$setter($value);
         }
     }
 
-
-    public function load(ObjectManager $manager) {
+    public function load(ObjectManager $manager)
+    {
         $dataFixture = $this->provideData();
 
         $model = $this
@@ -52,8 +65,5 @@ abstract class AbstractFixture /* extends AbstractFixtureData */ implements Fixt
                 ->getModel($this->entityName);
         $model->createEntities($this->createEntities($dataFixture, $model), true);
     }
-
-    
-
 
 }

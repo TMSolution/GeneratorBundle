@@ -95,31 +95,55 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
      * @param mixed $entity A Doctrine classname, or a \Faker\ORM\Doctrine\EntityPopulator instance
      * @param int   $number The number of entities to populate
      */
-    public function addEntity($entity, $number, $entityManager = array(), $customColumnFormatters = array(), $customModifiers = array(), $generateId = false) {
+     public function addEntity($entity, $number, $customColumnFormatters = array(), $customModifiers = array(), $generateId = false)
+    {
         if (!$entity instanceof EntityPopulator) {
             if (null === $this->manager) {
                 throw new \InvalidArgumentException("No entity manager passed to Doctrine Populator.");
             }
-            //echo   "Klasa:".$entity."\n";
-            $entityPopulator = new EntityPopulator($this->manager->getClassMetadata($entity), $this->manager);
-
-
-            $associationEntities = $entityPopulator->getAssociationEntities();
+//            $entity = new \Faker\ORM\Doctrine\EntityPopulator($this->manager->getClassMetadata($entity));
+            $entity = new EntityPopulator($this->manager->getClassMetadata($entity),$this->manager);
+            
+            $associationEntities = $entity->getAssociationEntities();
             $this->generator->findAssociatedIdentifiers($associationEntities, $this->manager);
         }
+        $entity->setColumnFormatters($entity->guessColumnFormatters($this->generator));
+        if ($customColumnFormatters) {
+            $entity->mergeColumnFormattersWith($customColumnFormatters);
+        }
+        $entity->mergeModifiersWith($customModifiers);
+        $this->generateId[$entity->getClass()] = $generateId;
 
-        $entityPopulator->setColumnFormatters($entityPopulator->guessColumnFormatters($this->generator));
-
-        /* if (!empty($customColumnFormatters)) {
-          $entityPopulator->mergeColumnFormattersWith($fieldMappings);
-          } */
-        $entityPopulator->mergeModifiersWith($customModifiers);
-        $this->generateId[$entityPopulator->getClass()] = $generateId;
-
-        $class = $entityPopulator->getClass();
-        $this->entities[$class] = $entityPopulator;
+        $class = $entity->getClass();
+        $this->entities[$class] = $entity;
         $this->quantities[$class] = $number;
     }
+//    
+//    public function addEntity($entity, $number, $entityManager = array(), $customColumnFormatters = array(), $customModifiers = array(), $generateId = false) {
+//        if (!$entity instanceof EntityPopulator) {
+//            if (null === $this->manager) {
+//                throw new \InvalidArgumentException("No entity manager passed to Doctrine Populator.");
+//            }
+//            //echo   "Klasa:".$entity."\n";
+//            $entityPopulator = new EntityPopulator($this->manager->getClassMetadata($entity), $this->manager);
+//
+//
+//            $associationEntities = $entityPopulator->getAssociationEntities();
+//            $this->generator->findAssociatedIdentifiers($associationEntities, $this->manager);
+//        }
+//
+//        $entityPopulator->setColumnFormatters($entityPopulator->guessColumnFormatters($this->generator));
+//
+//        /* if (!empty($customColumnFormatters)) {
+//          $entityPopulator->mergeColumnFormattersWith($fieldMappings);
+//          } */
+//        $entityPopulator->mergeModifiersWith($customModifiers);
+//        $this->generateId[$entityPopulator->getClass()] = $generateId;
+//
+//        $class = $entityPopulator->getClass();
+//        $this->entities[$class] = $entityPopulator;
+//        $this->quantities[$class] = $number;
+//    }
 
     protected function convert($size) {
         $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');

@@ -64,7 +64,7 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
                     }
 
 
-                    $insertedEntities[$class][] = $this->entities[$class]->execute($entityManager, $insertedEntities, $generateId);
+                    $insertedEntities[] = $this->getEntity($class,$entityManager, $insertedEntities, $generateId);
                 }
             }
 
@@ -80,6 +80,13 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
         }
 
         return $insertedEntities;
+    }
+    
+    
+    protected function getEntity($class,$entityManager, $insertedEntities, $generateId){
+        
+      return   $this->entities[$class]->execute($entityManager, $insertedEntities, $generateId);
+        
     }
 
     /**

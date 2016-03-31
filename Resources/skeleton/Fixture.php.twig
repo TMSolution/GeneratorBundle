@@ -34,19 +34,15 @@ class {{ fixture_class }} /*extends AbstractFixtureData*/ implements FixtureInte
 
     public function load(ObjectManager $manager) {
     
-        $entityMetadata = unserialize('{{ entitiesMetadata }}');
+        
     
 
-        $generator = \TMSolution\GeneratorBundle\Generator\Faker\Factory::create('en_US');
+        $generator = \TMSolution\GeneratorBundle\Generator\Faker\Factory::create('pl_PL');
         
-      /*  $customColumnFormatter = array(
-        
-        
-            
-          ); */
+        $customColumnFormatter = array(); 
         $populator = new Populator($generator, $manager);
         
-        $populator->addEntity('{{ entity_path }}', {{ quantity }}, $entityMetadata);
+        $populator->addEntity('{{ entity_path }}', {{ quantity }}, $customColumnFormatter);
         $insertedPKs = $populator->execute();
         
     }

@@ -19,17 +19,18 @@ use Core\BaseBundle\Annotation\FixtureDataType;
  *
  * @author Mariusz Piela <mariusz.piela@tmsolution.pl>
  */
-class FixtureGenerator extends Generator {
+class FixtureGenerator extends Generator
+{
 
-   
-    public function prepare($bundles) {
+    public function prepare($bundles)
+    {
 
         $entitiesMetadata = $this->prioritizationEntities($this->createEntitiesMetadata($bundles));
         return $this->sortEntitiesMetadata($entitiesMetadata);
     }
-    
-    
-    protected function setBasePriority($entityMetadata) {
+
+    protected function setBasePriority($entityMetadata)
+    {
 
         foreach ($entityMetadata->associationMappings as $associationMapping) {
 
@@ -40,7 +41,8 @@ class FixtureGenerator extends Generator {
         }
     }
 
-    protected function createEntitiesMetadata($bundles) {
+    protected function createEntitiesMetadata($bundles)
+    {
 
         $entitiesMetadata = array();
         $bundlesWithEntityDir = array();
@@ -50,8 +52,8 @@ class FixtureGenerator extends Generator {
             if (count($files) > 0) {
                 $this->createDataFixturesFolder($bundle->getPath());
                 foreach ($files as $file) {
-                    
-                    $entityName=$this->getFullClassName($file);
+
+                    $entityName = $this->getFullClassName($file);
                     $entitiesMetadata[$entityName] = $this->createEntityMetadata($entityName, $bundle);
                     $this->setBasePriority($entitiesMetadata[$entityName]);
                     $this->createFixtureAnnotation($entityName, $entitiesMetadata[$entityName]->fieldMappings);
@@ -62,10 +64,11 @@ class FixtureGenerator extends Generator {
     }
 
 //fixture
-    public function generate($bundles, $entityName, $type, $overrideFiles, $entitiesMetadata) {
+    public function generate($bundles, $entityName, $type, $overrideFiles, $entitiesMetadata)
+    {
 
         if ('bundle' == $type) {
-           
+
             $this->generateBundleFixture($overrideFiles, $entitiesMetadata);
         } else if ('entity' == $type || 'project' == $type) {
             
@@ -73,7 +76,8 @@ class FixtureGenerator extends Generator {
     }
 
 //fixture
-    protected function generateBundleFixture($overrideFiles, $entitiesMetadataArr) {
+    protected function generateBundleFixture($overrideFiles, $entitiesMetadataArr)
+    {
 
         $order = 0;
         foreach ($entitiesMetadataArr as $entitiesMetadata) {
@@ -89,27 +93,29 @@ class FixtureGenerator extends Generator {
         }
     }
 
-    protected function getEntities($bundles) {
+    protected function getEntities($bundles)
+    {
         
     }
 
 //fixture
-    protected function createFixtureClassFile($target, $className, $nameSpace, $overrideFiles, $entitiesMetadata, $order) {
+    protected function createFixtureClassFile($target, $className, $nameSpace, $overrideFiles, $entitiesMetadata, $order)
+    {
         $parameters = Array(
             'namespace' => str_replace('\Entity', '', $nameSpace),
-            'fixture_class' => 'Load' . $className . 'Data',
+            'fixture_class' => $className,
             'entity_path' => $nameSpace . '\\' . $className,
             'fields' => Array(),
             'quantity' => $entitiesMetadata->quantity,
             'order' => $order,
             'entitiesMetadata' => serialize($entitiesMetadata)
-            
-            
-            /*
-             * 
-             * 'name' => function() use ($generator) { return $generator->firstname()); },
-             * 
-             */
+
+
+                /*
+                 * 
+                 * 'name' => function() use ($generator) { return $generator->firstname()); },
+                 * 
+                 */
         );
 
 //@todo remove string 'TEST'
@@ -132,7 +138,8 @@ class FixtureGenerator extends Generator {
      * @param type $fieldMappings
      */
     //fixture
-    protected function createFixtureAnnotation($entity, &$fieldMappings) {
+    protected function createFixtureAnnotation($entity, &$fieldMappings)
+    {
 
         $anotationReader = new AnnotationReader();
         foreach ($fieldMappings as $fieldName => $fieldValue) {
@@ -152,7 +159,8 @@ class FixtureGenerator extends Generator {
      * @param Bundle $bundle 
      * @return \stdClass
      */
-    protected function createEntityMetadata($entityName, $bundle) {
+    protected function createEntityMetadata($entityName, $bundle)
+    {
 
         $em = $this->doctrine->getManager();
         $classMetadata = $em->getClassMetadata($entityName);
@@ -166,9 +174,9 @@ class FixtureGenerator extends Generator {
         return $entityMetadata;
     }
 
-
 //dla fixutre
-    protected function createDataFixturesFolder($bundlePath) {
+    protected function createDataFixturesFolder($bundlePath)
+    {
 
         $fs = new Filesystem();
 

@@ -76,7 +76,7 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
                 echo "BŁĄD: " . $e->getMessage();
             }
 
-            echo "Wykorzystanie pamięci " . $class . ": " . $this->convert(memory_get_usage()) . "\n";
+            echo "Memory usage " . $class . ": " . $this->convert(memory_get_usage()) . "\n";
         }
 
         return $insertedEntities;

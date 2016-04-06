@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
  *
  * @author Mariusz Piela <mariusz.piela@tmsolution.pl>
  */
-ini_set('max_execution_time', 300);
+
 class GenerateFixtureCommand extends GeneratorCommand {
 
     protected $questionHelper = null;

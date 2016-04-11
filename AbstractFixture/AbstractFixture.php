@@ -9,8 +9,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use TMSolution\GeneratorBundle\Generator\Faker\Populator;
 use CCO\CallCenterBundle\Entity\UserSkillGradationDictionary;
+use Doctrine\Common\DataFixtures\AbstractFixture as AbstractFixtureData;
 
-abstract class AbstractFixture /* extends AbstractFixtureData */ implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+abstract class AbstractFixture extends AbstractFixtureData implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
 
     /**
@@ -31,9 +32,12 @@ abstract class AbstractFixture /* extends AbstractFixtureData */ implements Fixt
 
     protected function createEntities($dataFixture, $model)
     {
+        $nr = 0;
         $entities = new \Doctrine\Common\Collections\ArrayCollection;
         foreach ($dataFixture as $array) {
             $entity = $model->getEntity();
+            ++$nr;
+            $this->addReference("{$this->entityName}:{$nr}", $entity);
             $this->setValues($entity, $array);
             $entities[] = $entity;
         }
@@ -48,7 +52,13 @@ abstract class AbstractFixture /* extends AbstractFixtureData */ implements Fixt
 
             if (isset($this->association[$key]) && !empty($value)) {
                 $model = $this->container->get('model_factory')->getModel($this->association[$key]);
-                $value = $model->getManager()->getReference($this->association[$key], $value);
+
+                try{
+                $value = $this->getReference($this->association[$key] . ':' . $value);
+                } catch(\Exception $e) {
+
+                    $value = $model->getManager()->getReference($this->association[$key], $value);
+                }
             }
             $setter = "set" . $key;
             $entity->$setter($value);
@@ -63,7 +73,8 @@ abstract class AbstractFixture /* extends AbstractFixtureData */ implements Fixt
                 ->container
                 ->get('model_factory')
                 ->getModel($this->entityName);
-        $model->createEntities($this->createEntities($dataFixture, $model), true);
+        $model->createEntities($this->createEntities($dataFixture, $model), false);
+        $model->flush();
     }
 
 }

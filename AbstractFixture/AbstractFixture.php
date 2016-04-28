@@ -51,17 +51,50 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
 
 
             if (isset($this->association[$key]) && !empty($value)) {
+                
+                // An association
+                
                 $model = $this->container->get('model_factory')->getModel($this->association[$key]);
 
-                try{
-                $value = $this->getReference($this->association[$key] . ':' . $value);
-                } catch(\Exception $e) {
-
-                    $value = $model->getManager()->getReference($this->association[$key], $value);
+                $references = [];
+                if (is_array($value)) {
+                    
+                    // ::Many
+                    foreach($value as $ref) {
+                        $references[] = $this->getReference(
+                            $this->association[$key] . ':' . $ref
+                        );
+                    }
+                    
+                    $debug = true;
+                    
+                } else {
+                    
+                    // ::One
+                    
+                    try{
+                        $references[] = $this->getReference(
+                            $this->association[$key] . ':' . $value
+                        );
+                    } catch(\Exception $e) {
+                        $references[] = $model->getManager()->getReference(
+                            $this->association[$key], $value
+                        );
+                    }
                 }
+                
+                $setter = "set" . $key;
+                foreach($references as $ref) {
+                    $entity->$setter($ref);
+                }
+                
+ 
+            } else {
+            
+                // Not an association                
+                $setter = "set" . $key;
+                $entity->$setter($value);
             }
-            $setter = "set" . $key;
-            $entity->$setter($value);
         }
     }
 
@@ -73,7 +106,7 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
                 ->container
                 ->get('model_factory')
                 ->getModel($this->entityName);
-        $model->createEntities($this->createEntities($dataFixture, $model), false);
+        $model->createEntities($this->createEntities($dataFixture, $model), true);
         $model->flush();
     }
 

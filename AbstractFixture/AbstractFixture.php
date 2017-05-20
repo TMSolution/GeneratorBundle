@@ -7,8 +7,6 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
-use TMSolution\GeneratorBundle\Generator\Faker\Populator;
-use CCO\CallCenterBundle\Entity\UserSkillGradationDictionary;
 use Doctrine\Common\DataFixtures\AbstractFixture as AbstractFixtureData;
 
 abstract class AbstractFixture extends AbstractFixtureData implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
@@ -30,12 +28,13 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
         $this->container = $container;
     }
 
-    protected function createEntities($dataFixture, $model)
+    protected function createEntities($dataFixture)
     {
         $nr = 0;
         $entities = new \Doctrine\Common\Collections\ArrayCollection;
         foreach ($dataFixture as $array) {
-            $entity = $model->getEntity();
+            $entityClass=$this->entityName;
+            $entity = new $entityClass;
             ++$nr;
             $this->addReference("{$this->entityName}:{$nr}", $entity);
             $this->setValues($entity, $array);
@@ -54,8 +53,11 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
                 
                 // An association
                 
-                $model = $this->container->get('model_factory')->getModel($this->association[$key]);
-
+                $entityManager = $this->container
+                ->get('doctrine')
+                ->getManager(); 
+                  
+               
                 $references = [];
                 if (is_array($value)) {
                     
@@ -77,7 +79,7 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
                             $this->association[$key] . ':' . $value
                         );
                     } catch(\Exception $e) {
-                        $references[] = $model->getManager()->getReference(
+                        $references[] = $entityManager->getReference(
                             $this->association[$key], $value
                         );
                     }
@@ -101,13 +103,8 @@ abstract class AbstractFixture extends AbstractFixtureData implements FixtureInt
     public function load(ObjectManager $manager)
     {
         $dataFixture = $this->provideData();
-
-        $model = $this
-                ->container
-                ->get('model_factory')
-                ->getModel($this->entityName);
-        $model->createEntities($this->createEntities($dataFixture, $model), true);
-        $model->flush();
+        $model = new Flexix\ModelBundle\Util\Model( $this->container->get('doctrine')->getManager());
+        $this->saveEntitites($this->createEntities($dataFixture));
     }
 
 }

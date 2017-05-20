@@ -17,8 +17,6 @@
     ],
     "require": {
         "php": ">=5.3.2",
-        "symfony/framework-bundle": "2.*",
-        "tmsolution/model-bundle":"1.*",
         "doctrine/doctrine-fixtures-bundle":"2.*",
         "fzaninotto/faker":"1.*"
     },

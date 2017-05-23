@@ -70,10 +70,10 @@ abstract class GeneratorCommand extends ContainerAwareCommand {
 */
     
     protected function getQuestionHelper() {
-        $dialog = $this->getHelperSet()->get('dialog');
-        if (!$dialog || get_class($dialog) !== 'TMSolution\GeneratorBundle\Command\Helper\QuestionHelper') {
+      //  $dialog = $this->getHelperSet()->get('dialog');
+      //  if (!$dialog || get_class($dialog) !== 'TMSolution\GeneratorBundle\Command\Helper\QuestionHelper') {
             $this->getHelperSet()->set($dialog = new QuestionHelper());
-        }
+      //  }
 
         return $dialog;
     }

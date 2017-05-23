@@ -43,7 +43,7 @@ class GenerateFixtureCommand extends GeneratorCommand {
                 ->setHelp(<<<EOT
 The <info>generate:fixture</info> command helps you generates new fixtures classes for test data loading.
 EOT
-                )->setName('generate:tmsolution:fixture')->setAliases(array('generate:fixture'));
+                )->setName('tmsolution:generate:fixture')->setAliases(array('generate:fixture'));
     }
 
     protected function interact(InputInterface $input, OutputInterface $output) {
@@ -70,14 +70,7 @@ EOT
             $question = new ConfirmationQuestion($questionHelper->getQuestion('Do you confirm generation', 'yes', '?'), true);
 
 
-//            $bundle  = $input->getOption('bundle');
-//            
-//            $questionHelper = $this->getQuestionHelper();
-//            $questionConfirm = new ConfirmationQuestion($questionHelper->getQuestion(
-//                            'Do you confirm generation', $bundle ? 'yes' : 'no'
-//                    ), $bundle);
-//            $bundle = $this->questionHelper->ask($this->input, $this->output, $questionConfirm);
-            //$input->setOption('bundle', $bundle);
+
 
 
             if (!$this->questionHelper->ask($this->input, $this->output, $question)) {
@@ -88,18 +81,12 @@ EOT
         }
 
         $generator = $this->getGenerator();
-//        dump($generator);exit;
-        //dump($this->getBundles($generationParams['bundleName']));exit;
-        //die('test dobry');
-        //step 1
+
         $entitiesMetadata = $generator->prepare($this->getBundles($generationParams['bundleName']));
-        //dump($entitiesMetadata);exit;
+     
 
         $entitiesMetadata = $this->showGenerationWizard($entitiesMetadata);
-        //die('ok');
-        //step 2
-        //@todo -> shoud look this way  $generator->generate($entitiesMetadata, $generationParams['overrideFiles']);
-        $generator->generate($this->getBundles($generationParams['bundleName']), $generationParams['entityName'], $this->type, $generationParams['overrideFiles'], $entitiesMetadata);
+           $generator->generate($this->getBundles($generationParams['bundleName']), $generationParams['entityName'], $this->type, $generationParams['overrideFiles'], $entitiesMetadata);
     }
 
     protected function showGenerationWizard($entitiesMetadata) {
@@ -226,7 +213,7 @@ EOT
                 //DialogHelper has not support anymore
                 $question = new Question($this->questionHelper->getQuestion('Please, set  <comment>bundle namespace</comment>', $namespace), $namespace);
                 $namespace = $this->questionHelper->ask($this->input, $this->output, $question);
-                $namespace = Validators::validateBundleNamespace($namespace);
+                //$namespace = Validators::validateBundleNamespace($namespace);
                 $bundleName = strtr($namespace, array('\\' => ''));
             }
         }
@@ -234,7 +221,7 @@ EOT
         $overrideFiles = null;
         //changed askconfirmation()  into doAsk()
         $questionFiles = new Question($this->questionHelper->getQuestion('Override existing backup files', $namespace), $namespace);
-        $overrideFiles = $this->questionHelper->doAsk($this->output, $questionFiles, true);
+        $overrideFiles = true;//$this->questionHelper->doAsk($this->output, $questionFiles, true);
         return array('bundleName' => !empty($bundleName) ? Validators::validateBundleName($bundleName) : null, 'entityName' => !empty($entityName) ? $entityName : null, 'overrideFiles' => !empty($overrideFiles) ? $overrideFiles : null);
     }
 

@@ -37,7 +37,7 @@ class LoadDataFixturesDoctrineCommand extends DoctrineCommand {
 
     protected function configure() {
         $this
-                ->setName('doctrine1:fixtures:load')
+                ->setName('tmsolution:fixtures:load')
                 ->setDescription('Load data fixtures to your database.')
                 ->addOption('fixtures', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The directory or file to load data fixtures from.')
                 ->addOption('append', null, InputOption::VALUE_NONE, 'Append the data fixtures instead of deleting all data from the database first.')
@@ -68,13 +68,13 @@ EOT
         /** @var $doctrine \Doctrine\Common\Persistence\ManagerRegistry */
         $doctrine = $this->getContainer()->get('doctrine');
         $em = $doctrine->getManager($input->getOption('em'));
-
-        if ($input->isInteractive() && !$input->getOption('append')) {
-            $dialog = $this->getHelperSet()->get('dialog');
-            if (!$dialog->askConfirmation($output, '<question>Careful, database will be purged. Do you want to continue Y/N ?</question>', false)) {
-                return;
-            }
-        }
+//
+//        if ($input->isInteractive() && !$input->getOption('append')) {
+//            $dialog = $this->getHelperSet()->get('dialog');
+//            if (!$dialog->askConfirmation($output, '<question>Careful, database will be purged. Do you want to continue Y/N ?</question>', false)) {
+//                return;
+//            }
+//        }
 
 
         $dirOrFile = $input->getOption('fixtures');

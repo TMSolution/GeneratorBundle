@@ -64,29 +64,25 @@ class FixtureGenerator extends Generator
     }
 
 //fixture
-    public function generate($bundles, $entityName, $type, $overrideFiles, $entitiesMetadata)
+    public function generate($bundles, $entityName, $type, $overrideFiles, $entitiesMetadata,$dir)
     {
 
         if ('bundle' == $type) {
 
-            $this->generateBundleFixture($overrideFiles, $entitiesMetadata);
-        } else if ('entity' == $type || 'project' == $type) {
-            
-        }
+            $this->generateBundleFixture($overrideFiles, $entitiesMetadata,$dir);
+        } 
     }
 
 //fixture
-    protected function generateBundleFixture($overrideFiles, $entitiesMetadataArr)
+    protected function generateBundleFixture($overrideFiles, $entitiesMetadataArr,$dir)
     {
 
         $order = 0;
         foreach ($entitiesMetadataArr as $entitiesMetadata) {
-// $bundles[0] . '/DataFixtures/ORM'
-//
-//dump($entitiesMetadata);
+
             $entity = explode('\\', $entitiesMetadata->name);
             $className = end($entity);
-            $target = $entitiesMetadata->bundlePath . '/DataFixtures/ORM/' . $className;
+            $target = $entitiesMetadata->bundlePath .sprintf('/DataFixtures/%s/',$dir) . $className;
             array_pop($entity);
             $namespace = implode('\\', $entity);
             $this->createFixtureClassFile($target, $className, $namespace, $overrideFiles, $entitiesMetadata, ++$order);
@@ -118,7 +114,7 @@ class FixtureGenerator extends Generator
                  */
         );
 
-//@todo remove string 'TEST'
+
         $target = $target . '.php';
 
         if ($overrideFiles && file_exists($target)) {

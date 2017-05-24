@@ -14,13 +14,13 @@ use TMSolution\GeneratorBundle\Command\Helper\QuestionHelper;
 use Sensio\Bundle\GeneratorBundle\Command\Validators;
 use TMSolution\GeneratorBundle\Generator\FixtureGenerator;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * Command for Generates fixture.
  *
  * @author Mariusz Piela <mariusz.piela@tmsolution.pl>
  */
-
 class GenerateFixtureCommand extends GeneratorCommand {
 
     protected $questionHelper = null;
@@ -29,6 +29,8 @@ class GenerateFixtureCommand extends GeneratorCommand {
     protected $input = null;
     protected $output = null;
 
+    const DEFAULT_QUANTITY = 100;
+
     /**
      * @see Command
      */
@@ -36,8 +38,10 @@ class GenerateFixtureCommand extends GeneratorCommand {
         $this
                 ->setDefinition(array(
                     new InputOption('entity', '', InputOption::VALUE_REQUIRED, 'The name of entity'),
-                    new InputOption('project', '', InputOption::VALUE_NONE, 'The name of project'),
-                    new InputOption('bundle', '', InputOption::VALUE_REQUIRED, 'The name of bundle')
+                    new InputOption('bundle', '', InputOption::VALUE_REQUIRED, 'The name of bundle'),
+                    new InputOption('dir', '', InputOption::VALUE_REQUIRED, 'The name of bundle', 'ORM'),
+                    new InputOption('quantity', '', InputOption::VALUE_REQUIRED, 'quantity', 100),
+                    new InputOption('silent', null, InputOption::VALUE_NONE, 'silent')
                 ))
                 ->setDescription('Generates a Fixture Classes')
                 ->setHelp(<<<EOT
@@ -63,9 +67,14 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
 
+         
+        if (true === $input->getOption('silent')) {
+            $output = new NullOutput();
+        }
+        
         $generationParams = $this->getGenerationParams();
         //dump($generationParams);exit;
-        if ($this->input->isInteractive()) {
+        if (!$this->input->getOption('silent') && $this->input->isInteractive()) {
             $questionHelper = $this->getQuestionHelper();
             $question = new ConfirmationQuestion($questionHelper->getQuestion('Do you confirm generation', 'yes', '?'), true);
 
@@ -82,30 +91,20 @@ EOT
 
         $generator = $this->getGenerator();
 
-        $entitiesMetadata = $generator->prepare($this->getBundles($generationParams['bundleName']));
+        $bundleName=$generationParams['bundleName'];
+        $bundles=$this->getBundles($bundleName);
+        $entitiesMetadata = $generator->prepare($bundles);
      
 
         $entitiesMetadata = $this->showGenerationWizard($entitiesMetadata);
-           $generator->generate($this->getBundles($generationParams['bundleName']), $generationParams['entityName'], $this->type, $generationParams['overrideFiles'], $entitiesMetadata);
+        $generator->generate($bundles, $generationParams['entityName'], $this->type, $generationParams['overrideFiles'], $entitiesMetadata, $this->input->getOption('dir'));
     }
 
     protected function showGenerationWizard($entitiesMetadata) {
-        //1. generate file yes/no
-        //foreach enity ask: how many elements generate
-        //write result into quantity parameter;
-        //or save file with default values and end program
-        //developer should start this command one more time, with parameter --entities-metdata-file=path-to-file
-        //if this parameter will be set, program should do procedure startnig from step 2
 
-        
+        $quantity = $this->input->getOption('quantity');
+        if (!$this->input->getOption('silent') && $this->input->isInteractive()) {
 
-//        $yes = null;
-//        $questionConfirm = new Question($this->questionHelper->getQuestion('Do you confirm generation', 'yes', '?', $yes), $yes);
-//        $yes = $this->questionHelper->ask($this->input, $this->output, $questionConfirm);
-
-        if ($this->input->isInteractive()) {
-
-            
             $questionHelper = $this->getQuestionHelper();
             $questionConf = new ConfirmationQuestion($questionHelper->getQuestion('Are you sure to create files?', 'yes', '?'), true);
 
@@ -113,34 +112,31 @@ EOT
                 $this->output->writeln('<error>Command aborted</error>');
 
                 return 1;
-            }
+            } else {
 
-//            $createFiles = null;
-//            $questionWizard = new Question($this->questionHelper->getQuestion('Are you sure to create files?', 'yes', '?', $createFiles), $createFiles);
-//            $createFiles = $this->questionHelper->ask($this->input, $this->output, $questionWizard);
-//            if (!$this->questionHelper->doAsk($this->output, $questionWizard)) {
-//                $this->output->writeln('<error>Command aborted</error>');
-//                return 1;
-//            } 
-            else {
-                
                 foreach ($entitiesMetadata as $entityMetadata) {
+
                     
-                    if ($this->input->isInteractive()) {
-                        
-                        $defaultQuantity = 100;
+                    if (!$this->input->getOption('silent') && $this->input->isInteractive() && !$quantity) {
                         $question2 = new Question($questionHelper->getQuestion('How many object of type ' . $entityMetadata->name . ' you want to create <comment>(default ' . $defaultQuantity . ')</comment>?', $defaultQuantity), true);
                         $quantity = $this->questionHelper->ask($this->input, $this->output, $question2);
-                        //die('ok');
-                        if ($quantity!=null) {
-                            $quantity = $defaultQuantity;
+                        if ($quantity != null) {
+                            $quantity = $this->input->getOption('quantity');
                         }
-                        $entityMetadata->quantity = $quantity;
                     }
+                    $entityMetadata->quantity = $quantity;
                 }
-                return $entitiesMetadata;
+            
             }
         }
+        else
+        {
+            foreach ($entitiesMetadata as $entityMetadata) {
+                 $entityMetadata->quantity = $quantity;
+            }
+        }
+        
+            return $entitiesMetadata;
     }
 
     /**
@@ -149,22 +145,16 @@ EOT
      * @return array Bundle Interface $bundle
      */
     protected function getBundles($bundleName) {
-        //dump($bundleName);exit;
-        //for delete 'Bundle' form bundleName
-        $name = ltrim($bundleName,"Bundle");
-        //dump($name);exit;
-        //$bundleName = 'PhantomBundle';
-        //wyzej zmieniono, gdyz przechodzi niewalsciwa sciezka
-        //die($bundleName); - to daje  BundlePhantomBundle
-        if ('project' == $this->type) {
-            return $this->getApplicationBundles();
-        } else if ('bundle' == $this->type) {
+
+
+        $name = ltrim($bundleName, "Bundle");
+        if ('bundle' == $this->type) {
 
             try {
                 $bundle = $this->kernel->getBundle($name);
             } catch (\Exception $e) {
 
-                $this->output->writeln(sprintf('<bg=red>Bundle "%s" does not exist.</>', $bundle));
+                $this->output->writeln(sprintf('<bg=red>Bundle "%s" does not exist.</>', $name));
             }
 
             return array($bundle);
@@ -196,33 +186,35 @@ EOT
             $entityName = Validators::validateEntityName($entityName);
             $entityNameArray = explode(':', $entityName);
             $bundleName = $entityNameArray[0];
-        } else if ($this->input->getOption('project')) {
-            $this->type = 'project';
-            $this->output->writeln('You choose <info>project</info> option for generation.');
         } else {
             $this->type = "bundle";
+            $bundle = null;
+            if ($this->input->getOption('bundle')) {
+                $bundle = $this->input->getOption('bundle');
+            } else {
 
-            if ($this->input->isInteractive()) {
-                $this->output->writeln(array(
-                    'You choose <info>bundle</info> option for generation.',
-                    'Each bundle is hosted under a namespace (like <comment>Acme/Bundle/BlogBundle</comment>).',
-                    'Please write namespace of your bundle to generate fixture data.'
-                ));
+                if (!$this->input->getOption('silent') && $this->input->isInteractive()) {
+                    $this->output->writeln(array(
+                        'You choose <info>bundle</info> option for generation.',
+                        'Each bundle is hosted under a namespace (like <comment>Acme/Bundle/BlogBundle</comment>).',
+                        'Please write namespace of your bundle to generate fixture data.'
+                    ));
 
-                $namespace = null;
-                //DialogHelper has not support anymore
-                $question = new Question($this->questionHelper->getQuestion('Please, set  <comment>bundle namespace</comment>', $namespace), $namespace);
-                $namespace = $this->questionHelper->ask($this->input, $this->output, $question);
-                //$namespace = Validators::validateBundleNamespace($namespace);
-                $bundleName = strtr($namespace, array('\\' => ''));
+                    
+                    $question = new Question($this->questionHelper->getQuestion('Please, set  <comment>bundle name</comment>', $bundle), $bundle);
+                    $bundle = $this->questionHelper->ask($this->input, $this->output, $question);
+                }
+                
             }
+          
+            $bundleName = strtr($bundle, array('\\' => ''));
         }
 
         $overrideFiles = null;
         //changed askconfirmation()  into doAsk()
-        $questionFiles = new Question($this->questionHelper->getQuestion('Override existing backup files', $namespace), $namespace);
-        $overrideFiles = true;//$this->questionHelper->doAsk($this->output, $questionFiles, true);
-        return array('bundleName' => !empty($bundleName) ? Validators::validateBundleName($bundleName) : null, 'entityName' => !empty($entityName) ? $entityName : null, 'overrideFiles' => !empty($overrideFiles) ? $overrideFiles : null);
+        $questionFiles = new Question($this->questionHelper->getQuestion('Override existing backup files', $bundle), $bundle);
+        $overrideFiles = true; //$this->questionHelper->doAsk($this->output, $questionFiles, true);
+        return array('bundleName' =>$bundleName , 'entityName' => !empty($entityName) ? $entityName : null, 'overrideFiles' => !empty($overrideFiles) ? $overrideFiles : null);
     }
 
     /**
@@ -231,7 +223,7 @@ EOT
      * @return path to Base dir
      */
     protected function getBaseDir() {
-        
+
         $dirParts = explode('/', $this->kernel->getRootDir());
         array_pop($dirParts);
         $baseDir = implode('/', $dirParts);

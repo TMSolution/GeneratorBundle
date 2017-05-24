@@ -25,6 +25,7 @@ use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DataFixtures;
 use InvalidArgumentException;
 use TMSolution\GeneratorBundle\Command\Helper\QuestionHelper;
+use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * Load data fixtures from bundles.
@@ -35,6 +36,8 @@ use TMSolution\GeneratorBundle\Command\Helper\QuestionHelper;
 ini_set('max_execution_time', 5000);
 class LoadDataFixturesDoctrineCommand extends DoctrineCommand {
 
+    
+    
     protected function configure() {
         $this
                 ->setName('tmsolution:fixtures:load')
@@ -42,7 +45,9 @@ class LoadDataFixturesDoctrineCommand extends DoctrineCommand {
                 ->addOption('fixtures', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The directory or file to load data fixtures from.')
                 ->addOption('append', null, InputOption::VALUE_NONE, 'Append the data fixtures instead of deleting all data from the database first.')
                 ->addOption('em', null, InputOption::VALUE_REQUIRED, 'The entity manager to use for this command.')
+                ->addOption('dir', null, InputOption::VALUE_REQUIRED, 'Fixtures dir','ORM')
                 ->addOption('purge-with-truncate', null, InputOption::VALUE_NONE, 'Purge data by using a database-level TRUNCATE statement')
+                ->addOption('silent', null, InputOption::VALUE_NONE, 'silent')
                 ->setHelp(<<<EOT
 The <info>doctrine:fixtures:load</info> command loads data fixtures from your bundles:
 
@@ -65,16 +70,15 @@ EOT
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
+        
+        if (true === $input->getOption('silent')) {
+            $output = new NullOutput();
+        }
+        
+        
         /** @var $doctrine \Doctrine\Common\Persistence\ManagerRegistry */
         $doctrine = $this->getContainer()->get('doctrine');
         $em = $doctrine->getManager($input->getOption('em'));
-//
-//        if ($input->isInteractive() && !$input->getOption('append')) {
-//            $dialog = $this->getHelperSet()->get('dialog');
-//            if (!$dialog->askConfirmation($output, '<question>Careful, database will be purged. Do you want to continue Y/N ?</question>', false)) {
-//                return;
-//            }
-//        }
 
 
         $dirOrFile = $input->getOption('fixtures');
@@ -84,7 +88,7 @@ EOT
         } else {
             $paths = array();
             foreach ($this->getApplication()->getKernel()->getBundles() as $bundle) {
-                $paths[] = $bundle->getPath() . '/DataFixtures/ORM';
+                $paths[] = $bundle->getPath() . sprintf('/DataFixtures/%s',$input->getOption('dir'));
             }
         }
 

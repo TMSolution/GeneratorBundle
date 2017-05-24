@@ -30,7 +30,7 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
      *
      * @return array A list of the inserted PKs
      */
-    public function execute($entityManager = null) {
+    public function execute($entityManager = null, $flush = true) {
 
         if (null === $entityManager) {
             $entityManager = $this->manager;
@@ -43,15 +43,13 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
 
         $entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
         ini_set("memory_limit", "-1");
-
-
-        $insertedEntities = array();
+        $insertedEntities = [];
         foreach ($this->quantities as $class => $number) {
-
+            
             $generateId = $this->generateId[$class];
 
             $counter = 0;
-            $packageSize = 10000;
+            $packageSize = 1000;
             $packageQuantity = ceil((float) $number / $packageSize);
 
             for ($j = 0; $j < $packageQuantity; $j++) {
@@ -64,29 +62,29 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
                     }
 
 
-                    $insertedEntities[] = $this->getEntity($class,$entityManager, $insertedEntities, $generateId);
+                    $insertedEntities[] = $this->getEntity($class, $entityManager, $insertedEntities, $generateId);
                 }
             }
 
+            if ($flush) {
+                try {
 
-            try {
-                $entityManager->flush();
-                $entityManager->clear();
-            } catch (Exception $e) {
-                echo "BŁĄD: " . $e->getMessage();
+                    $entityManager->flush();
+                    $entityManager->clear();
+                } catch (Exception $e) {
+                    echo "BŁĄD: " . $e->getMessage();
+                }
             }
-
+            
             echo "Memory usage " . $class . ": " . $this->convert(memory_get_usage()) . "\n";
         }
 
         return $insertedEntities;
     }
-    
-    
-    protected function getEntity($class,$entityManager, $insertedEntities, $generateId){
-        
-      return   $this->entities[$class]->execute($entityManager, $insertedEntities, $generateId);
-        
+
+    protected function getEntity($class, $entityManager, $insertedEntities, $generateId) {
+
+        return $this->entities[$class]->execute($entityManager, $insertedEntities, $generateId);
     }
 
     /**
@@ -95,15 +93,14 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
      * @param mixed $entity A Doctrine classname, or a \Faker\ORM\Doctrine\EntityPopulator instance
      * @param int   $number The number of entities to populate
      */
-     public function addEntity($entity, $number, $customColumnFormatters = array(), $customModifiers = array(), $generateId = false)
-    {
+    public function addEntity($entity, $number, $customColumnFormatters = array(), $customModifiers = array(), $generateId = false) {
         if (!$entity instanceof EntityPopulator) {
             if (null === $this->manager) {
                 throw new \InvalidArgumentException("No entity manager passed to Doctrine Populator.");
             }
 //            $entity = new \Faker\ORM\Doctrine\EntityPopulator($this->manager->getClassMetadata($entity));
-            $entity = new EntityPopulator($this->manager->getClassMetadata($entity),$this->manager);
-            
+            $entity = new EntityPopulator($this->manager->getClassMetadata($entity), $this->manager);
+
             $associationEntities = $entity->getAssociationEntities();
             $this->generator->findAssociatedIdentifiers($associationEntities, $this->manager);
         }
@@ -118,6 +115,7 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
         $this->entities[$class] = $entity;
         $this->quantities[$class] = $number;
     }
+
 //    
 //    public function addEntity($entity, $number, $entityManager = array(), $customColumnFormatters = array(), $customModifiers = array(), $generateId = false) {
 //        if (!$entity instanceof EntityPopulator) {

@@ -2,23 +2,20 @@
 
 namespace {{ namespace }}\DataFixtures\ORM;
 
-{% block use_statements %}
+{%- block use_statements %}
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use TMSolution\GeneratorBundle\Generator\Faker\Populator;
-
-
-{% endblock use_statements %}
-
-{% block class_definition %}
-class {{ fixture_class }} /*extends AbstractFixtureData*/ implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+{%- endblock use_statements %}
+{%- block class_definition %}
+    
+class {{ fixture_class }} implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {% endblock class_definition %}
 {
-{% block class_body %} 
-   
+{%- block class_body %} 
 
     /**
      * @var ContainerInterface
@@ -34,14 +31,9 @@ class {{ fixture_class }} /*extends AbstractFixtureData*/ implements FixtureInte
 
     public function load(ObjectManager $manager) {
     
-        
-    
-
-        $generator = \TMSolution\GeneratorBundle\Generator\Faker\Factory::create('pl_PL');
-        
+        $generator = \TMSolution\GeneratorBundle\Generator\Faker\Factory::create($this->container->getParameter('locale'));
         $customColumnFormatter = array(); 
         $populator = new Populator($generator, $manager);
-        
         $populator->addEntity('{{ entity_path }}', {{ quantity }}, $customColumnFormatter);
         $insertedPKs = $populator->execute();
         
@@ -54,24 +46,5 @@ class {{ fixture_class }} /*extends AbstractFixtureData*/ implements FixtureInte
         return {{ order }};
     }
 
-
- {% if fields|length > 0 %}
-    /**
-     * @param FormBuilderInterface $builder
-     * @param array $options
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        $builder
-        {%- for field in fields %}
-
-            ->add('{{ field }}')
-        {%- endfor %}
-
-        ;
-    }
-    {% endif %}
-
- 
 {% endblock class_body %}
 }{# empty Twig template #}

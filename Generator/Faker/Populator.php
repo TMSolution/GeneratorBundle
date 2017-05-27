@@ -30,7 +30,7 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
      *
      * @return array A list of the inserted PKs
      */
-    public function execute($entityManager = null, $flush = true) {
+    public function execute($entityManager = null, $flush = true, $light = false) {
 
         if (null === $entityManager) {
             $entityManager = $this->manager;
@@ -43,9 +43,15 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
 
         $entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
         ini_set("memory_limit", "-1");
-        $insertedEntities = [];
+        
+            if ($light != true) {
+            $insertedEntities = [];
+        }
+        
         foreach ($this->quantities as $class => $number) {
-            
+            if ($light == true) {
+                $insertedEntities = [];
+            }
             $generateId = $this->generateId[$class];
 
             $counter = 0;
@@ -60,26 +66,30 @@ class Populator extends \Faker\ORM\Doctrine\Populator {
 
                         break;
                     }
-
-
+                    
                     $insertedEntities[] = $this->getEntity($class, $entityManager, $insertedEntities, $generateId);
                 }
             }
 
             if ($flush) {
+                
                 try {
 
                     $entityManager->flush();
                     $entityManager->clear();
                 } catch (Exception $e) {
-                    echo "BŁĄD: " . $e->getMessage();
+                    echo "Errror: " . $e->getMessage();
                 }
             }
-            
-            echo "Memory usage " . $class . ": " . $this->convert(memory_get_usage()) . "\n";
         }
-
+        if($light==true)
+        {    
+            return true;
+        }
+        else
+        {    
         return $insertedEntities;
+        }
     }
 
     protected function getEntity($class, $entityManager, $insertedEntities, $generateId) {

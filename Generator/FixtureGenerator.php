@@ -3,14 +3,8 @@
 namespace TMSolution\GeneratorBundle\Generator;
 
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\DependencyInjection\Container;
 use TMSolution\GeneratorBundle\Generator\Generator;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Symfony\Component\Finder\Finder;
-use TMSolution\GeneratorBundle\PHPAnalyzer;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Doctrine\Bundle\DoctrineBundle\Mapping\DisconnectedMetadataFactory;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Core\BaseBundle\Annotation\FixtureDataType;
 
